@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>About Us | Maa Vaishnavi Eye Hospital</title>
+    
+    <!-- GSAP & ScrollTrigger -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,600;0,800;1,400;1,600&display=swap');
+        
+        :root {
+            --bg-dark: #02060b;
+            --bg-light: #0a192f;
+            --gold: #D4AF37;
+            --text-main: #ffffff;
+            --text-muted: #8b9bb4;
+        }
+
+        body, html { 
+            margin: 0; padding: 0; 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-dark); 
+            color: var(--text-main); 
+            overflow-x: hidden; 
+        }
+
+        h1, h2, h3, .serif { font-family: 'Playfair Display', serif; }
+
+        /* Header / Nav */
+        header { 
+            position: fixed; width: 100%; top: 0; padding: 25px 6vw; display: flex; 
+            justify-content: space-between; align-items: center; z-index: 100;
+            background: linear-gradient(to bottom, rgba(2, 6, 11, 0.9) 0%, rgba(2, 6, 11, 0) 100%);
+            box-sizing: border-box; transition: all 0.4s ease;
+        }
+        header.scrolled { background: rgba(2, 6, 11, 0.95); backdrop-filter: blur(10px); padding: 15px 6vw; border-bottom: 1px solid rgba(212, 175, 55, 0.1); }
+        .logo { font-size: clamp(1.2rem, 3vw, 1.5rem); font-weight: 800; color: var(--gold); text-decoration: none; letter-spacing: 1px; }
+        
+        .back-btn {
+            color: var(--text-main); text-decoration: none; font-size: clamp(0.8rem, 2vw, 0.9rem); text-transform: uppercase;
+            letter-spacing: 2px; border-bottom: 1px solid transparent; transition: all 0.3s ease;
+        }
+        .back-btn:hover { color: var(--gold); border-bottom: 1px solid var(--gold); }
+
+        /* Cinematic Hero Section */
+        .about-hero {
+            height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; position: relative; padding: 0 5vw; box-sizing: border-box;
+        }
+        .about-hero::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 50% 50%, rgba(10, 25, 47, 0.4) 0%, #02060b 80%); z-index: -1;
+        }
+        .tagline {
+            font-size: clamp(2.5rem, 8vw, 7rem); font-style: italic; color: var(--gold);
+            line-height: 1.1; margin: 0; text-shadow: 0 10px 30px rgba(212, 175, 55, 0.2);
+        }
+        .tagline-sub {
+            font-size: clamp(0.9rem, 2vw, 1.2rem); text-transform: uppercase; letter-spacing: 5px; color: var(--text-muted);
+            margin-top: 20px; font-family: 'Inter', sans-serif; line-height: 1.5;
+        }
+
+        /* The Story Sections */
+        .story-section { padding: 150px 10vw; max-width: 1200px; margin: 0 auto; box-sizing: border-box; }
+        .line-mask { overflow: hidden; margin-bottom: 10px; }
+        .story-text {
+            font-size: clamp(1.5rem, 4vw, 2.5rem); line-height: 1.4; color: var(--text-main); margin: 0;
+            font-weight: 300; transform: translateY(100%); opacity: 0;
+        }
+        .story-text span { color: var(--gold); font-style: italic; font-family: 'Playfair Display', serif; }
+        .story-paragraph { margin-bottom: 40px; }
+        .story-paragraph p {
+            font-size: clamp(1rem, 2.5vw, 1.1rem); color: var(--text-muted); line-height: 1.8; max-width: 700px; margin-top: 30px;
+            opacity: 0; transform: translateY(30px);
+        }
+
+        /* Parallax Image Break */
+        .parallax-break {
+            height: 50vh; width: 100%; position: relative; overflow: hidden;
+            display: flex; justify-content: center; align-items: center; padding: 0 5vw; box-sizing: border-box;
+        }
+        .parallax-img {
+            position: absolute; top: 0; left: 0; width: 100%; height: 130%; 
+            background-image: url('1.jpeg'); background-size: cover; background-position: center;
+            z-index: -2; filter: grayscale(50%) brightness(0.4);
+        }
+        .parallax-overlay-text {
+            font-size: clamp(2rem, 5vw, 3rem); color: var(--gold); font-family: 'Playfair Display', serif; text-align: center;
+            z-index: 1; text-shadow: 0 5px 20px rgba(0,0,0,0.8); line-height: 1.2;
+        }
+
+        /* Services List */
+        .services-section { padding: 150px 10vw; background: #050a12; box-sizing: border-box; }
+        .section-header { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 4px; color: var(--gold); margin-bottom: 50px; }
+        
+        .services-container { display: flex; flex-direction: column; gap: 15px; }
+        
+        .service-item {
+            padding: 35px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.4s ease;
+        }
+        .service-item:hover {
+            border-bottom: 1px solid var(--gold); padding-left: 20px; padding-right: 20px;
+            background: rgba(212, 175, 55, 0.03); border-radius: 8px;
+        }
+        
+        .service-header-row {
+            display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 15px;
+        }
+        
+        .service-number { font-size: 1.1rem; color: var(--text-muted); font-family: 'Inter', sans-serif; font-weight: 300; }
+        .service-name { font-size: clamp(1.4rem, 4vw, 2.2rem); font-family: 'Playfair Display', serif; color: var(--text-main); margin: 0; transition: color 0.3s ease; line-height: 1.2; }
+        .service-item:hover .service-name { color: var(--gold); }
+        .service-item:hover .service-number { color: var(--gold); }
+        
+        .service-desc {
+            font-size: clamp(0.95rem, 2.5vw, 1.05rem); color: var(--text-muted); line-height: 1.6; max-width: 800px;
+            font-family: 'Inter', sans-serif; margin: 0;
+        }
+
+        /* MOBILE SPECIFIC OPTIMIZATIONS */
+        @media (max-width: 768px) {
+            header { padding: 20px 5vw; }
+            header.scrolled { padding: 15px 5vw; }
+            
+            /* Reduce massive gaps on small screens */
+            .story-section { padding: 80px 6vw; }
+            .services-section { padding: 80px 6vw; }
+            
+            .service-item { padding: 25px 0; }
+            .service-header-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .service-number { font-size: 0.9rem; order: -1; color: var(--gold); opacity: 0.7; } /* Moves number above title on mobile */
+            
+            .story-text { display: inline; } /* Prevents awkward line breaks on phones */
+            .line-mask { display: inline; overflow: visible; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <header id="navbar">
+        <a href="index.html" class="logo">Maa Vaishnavi.</a>
+        <a href="index.html" class="back-btn">Return Home</a>
+    </header>
+
+    <!-- Cinematic Hero -->
+    <section class="about-hero">
+        <div class="line-mask"><h1 class="tagline title-anim">"Your Vision,</h1></div>
+        <div class="line-mask"><h1 class="tagline title-anim">Our Mission." <span style="font-size: clamp(2.5rem, 5vw, 4rem);">👁️✨</span></h1></div>
+        <div class="tagline-sub title-anim-sub" style="opacity: 0;">Maa Vaishnavi Eye Hospital – Ranchi</div>
+    </section>
+
+    <!-- The Story Section 1 -->
+    <section class="story-section">
+        <div class="story-paragraph">
+            <div class="line-mask"><h2 class="story-text text-reveal">Maa Vaishnavi Eye Hospital is dedicated</h2></div>
+            <div class="line-mask"><h2 class="story-text text-reveal">to providing <span>advanced, affordable,</span> and</h2></div>
+            <div class="line-mask"><h2 class="story-text text-reveal">compassionate eye care services</h2></div>
+            <div class="line-mask"><h2 class="story-text text-reveal">for patients of all ages.</h2></div>
+            
+            <p class="fade-up">Our experienced ophthalmologists and skilled medical staff use modern diagnostic and surgical technology to ensure accurate diagnosis and effective treatment of various eye conditions.</p>
+        </div>
+    </section>
+
+    <!-- Parallax Image Divider -->
+    <section class="parallax-break">
+        <div class="parallax-img"></div>
+        <h2 class="parallax-overlay-text fade-up">Preserving & Improving Vision.</h2>
+    </section>
+
+    <!-- The Story Section 2 -->
+    <section class="story-section">
+        <div class="story-paragraph">
+            <div class="line-mask"><h2 class="story-text text-reveal">We believe that <span>clear vision</span> is</h2></div>
+            <div class="line-mask"><h2 class="story-text text-reveal">the key to a better quality of life.</h2></div>
+            
+            <p class="fade-up">With a patient-centered approach, ethical medical practices, and a commitment to excellence, we strive to be one of the most trusted eye care centers in Ranchi and the surrounding regions. Our mission is to deliver personalized care in a safe and comfortable environment.</p>
+        </div>
+    </section>
+
+    <!-- Cinematic Services List -->
+    <section class="services-section">
+        <div class="section-header fade-up">Comprehensive Services Offered</div>
+        
+        <div class="services-container">
+            <!-- Service 1 -->
+            <div class="service-item list-reveal">
+                <div class="service-header-row">
+                    <span class="service-name">Comprehensive Eye Check-ups</span>
+                    <span class="service-number">01</span>
+                </div>
+                <p class="service-desc">Thorough, state-of-the-art visual evaluations to ensure optimal eye health, prescribe accurate vision correction, and detect potential issues early.</p>
+            </div>
+            
+            <!-- Service 2 -->
+            <div class="service-item list-reveal">
+                <div class="service-header-row">
+                    <span class="service-name">Cataract Surgery <span style="font-size: clamp(0.9rem, 2vw, 1.2rem); color: #8b9bb4; font-family: 'Inter', sans-serif;">(Phaco)</span></span>
+                    <span class="service-number">02</span>
+                </div>
+                <p class="service-desc">Advanced Phacoemulsification and premium Intraocular Lenses (IOLs) for quick, painless, and highly precise vision restoration.</p>
+            </div>
+
+            <!-- Service 3 -->
+            <div class="service-item list-reveal">
+                <div class="service-header-row">
+                    <span class="service-name">Glaucoma Treatment</span>
+                    <span class="service-number">03</span>
+                </div>
+                <p class="service-desc">Advanced tonometry and optic nerve imaging to accurately diagnose, manage, and protect your sight from glaucoma-related damage.</p>
+            </div>
+
+            <!-- Service 4 -->
+            <div class="service-item list-reveal">
+                <div class="service-header-row">
+                    <span class="service-name">Retina & Diabetic Eye Care</span>
+                    <span class="service-number">04</span>
+                </div>
+                <p class="service-desc">Specialized screening, injections, and laser treatments designed to protect against and treat diabetes-related vision loss and retinal disorders.</p>
+            </div>
+
+            <!-- Service 5 -->
+            <div class="service-item list-reveal">
+                <div class="service-header-row">
+                    <span class="service-name">Pediatric Eye Care</span>
+                    <span class="service-number">05</span>
+                </div>
+                <p class="service-desc">Gentle, expert care tailored specifically for children, addressing developmental vision issues, refractive errors, and eye health.</p>
+            </div>
+
+            <!-- Service 6 -->
+            <div class="service-item list-reveal">
+                <div class="service-header-row">
+                    <span class="service-name">Squint Evaluation</span>
+                    <span class="service-number">06</span>
+                </div>
+                <p class="service-desc">Comprehensive surgical and non-surgical therapies to correct eye alignment, restoring both appearance and binocular vision.</p>
+            </div>
+
+            <!-- Service 7 -->
+            <div class="service-item list-reveal">
+                <div class="service-header-row">
+                    <span class="service-name">LASIK & Refractive Services</span>
+                    <span class="service-number">07</span>
+                </div>
+                <p class="service-desc">Modern laser vision correction procedures designed to help you live a clear, vibrant life entirely free from glasses and contacts.</p>
+            </div>
+
+            <!-- Service 8 -->
+            <div class="service-item list-reveal">
+                <div class="service-header-row">
+                    <span class="service-name">Optical & Contact Lenses</span>
+                    <span class="service-number">08</span>
+                </div>
+                <p class="service-desc">A premium selection of designer frames, specialized lightweight lenses, and expert contact lens fitting directly inside the hospital.</p>
+            </div>
+
+            <!-- Service 9 -->
+            <div class="service-item list-reveal">
+                <div class="service-header-row">
+                    <span class="service-name">Emergency Eye Care</span>
+                    <span class="service-number">09</span>
+                </div>
+                <p class="service-desc">Immediate trauma response and urgent care protocols for acute ocular conditions, infections, and accidental eye injuries.</p>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Navbar scroll effect
+        window.addEventListener("scroll", () => {
+            document.getElementById("navbar").classList.toggle("scrolled", window.scrollY > 30);
+        });
+
+        // GSAP Animations
+        gsap.registerPlugin(ScrollTrigger);
+
+        const tl = gsap.timeline();
+        tl.to(".title-anim", { y: 0, duration: 1.2, stagger: 0.15, ease: "power3.out", delay: 0.2 })
+          .to(".title-anim-sub", { opacity: 1, y: -10, duration: 0.8, ease: "power2.out" }, "-=0.6");
+
+        document.querySelectorAll(".text-reveal").forEach((text) => {
+            gsap.to(text, {
+                y: 0, opacity: 1, duration: 1, ease: "power3.out",
+                scrollTrigger: { trigger: text, start: "top 90%", toggleActions: "play none none none" }
+            });
+        });
+
+        document.querySelectorAll(".fade-up").forEach((elem) => {
+            gsap.to(elem, {
+                y: 0, opacity: 1, duration: 1, ease: "power2.out",
+                scrollTrigger: { trigger: elem, start: "top 90%", toggleActions: "play none none none" }
+            });
+        });
+
+        gsap.to(".parallax-img", {
+            yPercent: 20, ease: "none",
+            scrollTrigger: { trigger: ".parallax-break", start: "top bottom", end: "bottom top", scrub: true }
+        });
+
+        // Fixed Reveal for Services list
+        gsap.fromTo(".list-reveal", 
+            { y: 30, opacity: 0 },
+            { 
+                y: 0, opacity: 1, duration: 0.6, stagger: 0.08, ease: "power2.out",
+                scrollTrigger: { trigger: ".services-container", start: "top 85%" }
+            }
+        );
+    </script>
+</body>
+</html>

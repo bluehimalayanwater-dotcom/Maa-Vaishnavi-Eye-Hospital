@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Maa Vaishnavi Eye Hospital | Premium Care</title>
+    
+    <!-- Load Three.js & GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:ital,wght@0,600;0,800;1,600&display=swap');
+        
+        :root {
+            --bg-dark: #030a14;
+            --bg-light: #0a192f;
+            --gold: #D4AF37;
+            --gold-glow: rgba(212, 175, 55, 0.4);
+            --text-main: #ffffff;
+            --text-muted: #a8b2d1;
+        }
+
+        body, html { 
+            margin: 0; padding: 0; 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-dark); 
+            color: var(--text-main); 
+            overflow-x: hidden; 
+            scroll-behavior: smooth;
+            cursor: none; /* Hide default cursor on desktop */
+        }
+
+        h1, h2, h3, .logo { font-family: 'Playfair Display', serif; }
+
+        /* Custom Interactive Cursor */
+        .cursor-dot {
+            width: 8px; height: 8px; background-color: var(--gold); border-radius: 50%;
+            position: fixed; top: 0; left: 0; pointer-events: none; z-index: 10000;
+            transform: translate(-50%, -50%); transition: width 0.3s, height 0.3s, background-color 0.3s;
+        }
+        .cursor-outline {
+            width: 40px; height: 40px; border: 1px solid var(--gold); border-radius: 50%;
+            position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9999;
+            transform: translate(-50%, -50%); transition: width 0.2s, height 0.2s, transform 0.1s ease-out;
+        }
+        body.hovering .cursor-dot { width: 50px; height: 50px; background-color: rgba(212, 175, 55, 0.2); }
+        body.hovering .cursor-outline { opacity: 0; }
+
+        /* Cinematic Loader */
+        #intro-loader {
+            position: fixed; inset: 0; background: #010408; z-index: 9998;
+            display: flex; justify-content: center; align-items: center; flex-direction: column;
+        }
+        .loader-title { font-size: clamp(2rem, 5vw, 4rem); color: var(--gold); overflow: hidden; display: flex; }
+        .loader-title span { transform: translateY(100%); display: inline-block; }
+        .loader-line { width: 0%; height: 2px; background: var(--gold); margin-top: 20px; box-shadow: 0 0 10px var(--gold-glow); }
+
+        /* 3D Canvas */
+        #canvas-container { 
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; 
+            background: radial-gradient(circle at 50% 50%, #0a192f 0%, #030a14 100%);
+        }
+        
+        /* Header & Navigation */
+        header { 
+            position: fixed; width: 100%; top: 0; padding: 25px 6vw; display: flex; justify-content: space-between; 
+            align-items: center; background: linear-gradient(to bottom, rgba(3, 10, 20, 0.9) 0%, rgba(3, 10, 20, 0) 100%);
+            z-index: 100; box-sizing: border-box; transition: all 0.4s ease; opacity: 0; transform: translateY(-20px);
+        }
+        header.scrolled { background: rgba(10, 25, 47, 0.85); backdrop-filter: blur(15px); padding: 15px 6vw; border-bottom: 1px solid rgba(212, 175, 55, 0.1); }
+        .logo { font-size: clamp(1.2rem, 3vw, 1.8rem); font-weight: 800; color: var(--gold); letter-spacing: 1px; text-decoration: none; }
+        
+        .nav-links { display: flex; gap: 30px; align-items: center; }
+        .nav-item { color: var(--text-main); text-decoration: none; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1.5px; transition: color 0.3s ease; }
+        .nav-item:hover { color: var(--gold); }
+
+        /* Buttons */
+        .btn { 
+            pointer-events: auto; background: transparent; color: var(--gold); padding: 12px 30px; 
+            border: 1px solid var(--gold); border-radius: 4px; font-family: 'Inter', sans-serif;
+            font-weight: 600; font-size: clamp(0.8rem, 2vw, 0.9rem); text-transform: uppercase; letter-spacing: 1.5px;
+            position: relative; overflow: hidden; transition: all 0.4s ease; cursor: pointer;
+        }
+        .btn::before {
+            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+            background: var(--gold); transition: all 0.4s ease; z-index: -1;
+        }
+        .btn:hover::before { left: 0; }
+        .btn:hover { color: var(--bg-dark); box-shadow: 0 0 20px var(--gold-glow); }
+
+        /* Hero Section */
+        .hero { 
+            height: 100vh; display: flex; flex-direction: column; justify-content: center; 
+            padding: 0 8vw; pointer-events: none; position: relative; box-sizing: border-box;
+        }
+        .hero-text { overflow: hidden; }
+        .hero h1 { font-size: clamp(2.5rem, 8vw, 6.5rem); line-height: 1.1; margin: 0 0 20px 0; color: var(--text-main); max-width: 800px; transform: translateY(100px); opacity: 0; }
+        .hero h1 span { color: var(--gold); font-style: italic; }
+        .hero p { font-size: clamp(0.95rem, 2vw, 1.2rem); max-width: 500px; color: var(--text-muted); line-height: 1.8; margin-bottom: 40px; transform: translateY(50px); opacity: 0; }
+
+        .hero-booking-card {
+            position: absolute; bottom: -50px; right: 8vw; background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); padding: 40px;
+            border-radius: 12px; width: 350px; pointer-events: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            z-index: 10; transform: translateY(100px); opacity: 0; box-sizing: border-box;
+        }
+        .hero-booking-card h3 { font-size: 1.5rem; margin-top: 0; color: var(--gold); }
+        .hero-booking-card p { font-size: 0.9rem; margin-bottom: 20px; line-height: 1.6;}
+
+        /* Content Sections */
+        .section { padding: 120px 8vw; background: var(--bg-dark); position: relative; z-index: 1; box-sizing: border-box; }
+        .section.light-bg { background: var(--bg-light); }
+        .section-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 60px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; }
+        .section-title { font-size: clamp(2.5rem, 5vw, 3.5rem); color: var(--gold); margin: 0; }
+        .section-subtitle { font-family: 'Inter', sans-serif; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; font-size: clamp(0.8rem, 2vw, 1rem); }
+
+        .reveal { opacity: 0; transform: translateY(50px); transition: all 1s cubic-bezier(0.5, 0, 0, 1); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        /* Doctor Profile Split Layout */
+        .split-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+        .image-wrapper { position: relative; border-radius: 8px; overflow: hidden; }
+        .image-wrapper img { width: 100%; height: auto; display: block; border-radius: 8px; filter: contrast(1.1) grayscale(10%); transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        .image-wrapper:hover img { filter: contrast(1.1) grayscale(0%); transform: scale(1.05); }
+
+        .text-content h3 { font-size: clamp(2rem, 4vw, 2.5rem); margin: 0 0 10px 0; }
+        .text-content h4 { font-family: 'Inter', sans-serif; color: var(--gold); margin: 0 0 30px 0; font-weight: 400; font-size: 1.1rem; }
+        .text-content p { color: var(--text-muted); line-height: 1.8; font-size: clamp(0.95rem, 2vw, 1.1rem); margin-bottom: 20px; }
+
+        /* Editorial Gallery Grid */
+        .editorial-grid { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: auto auto; gap: 20px; }
+        .grid-item { overflow: hidden; border-radius: 4px; position: relative; }
+        .grid-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); filter: grayscale(30%); }
+        .grid-item:hover img { transform: scale(1.1); filter: grayscale(0%); }
+        
+        .item-1 { grid-column: 1 / 3; grid-row: 1 / 3; height: 500px; } 
+        .item-2 { grid-column: 3 / 4; grid-row: 1 / 2; height: 240px; }
+        .item-3 { grid-column: 4 / 5; grid-row: 1 / 2; height: 240px; }
+        .item-4 { grid-column: 3 / 5; grid-row: 2 / 3; height: 240px; } 
+        .item-5 { grid-column: 1 / 5; height: 300px; margin-top: 20px; } 
+
+        /* MOBILE SPECIFIC OPTIMIZATIONS */
+        @media (max-width: 900px) {
+            header { padding: 20px 5vw; }
+            header.scrolled { padding: 15px 5vw; }
+            .nav-links { gap: 15px; }
+            .nav-item { display: none; } /* Hide 'About Us' text link on very small screens to save space for the button */
+            
+            .section { padding: 80px 6vw; } /* Reduce padding on mobile */
+            .section-header { flex-direction: column; align-items: flex-start; gap: 10px; margin-bottom: 40px; }
+            
+            .split-layout { grid-template-columns: 1fr; gap: 40px;}
+            
+            .editorial-grid { grid-template-columns: 1fr; gap: 10px;}
+            .item-1, .item-2, .item-3, .item-4, .item-5 { grid-column: 1 / -1; grid-row: auto; height: 250px; margin-top: 0; }
+            
+            .hero-booking-card { position: relative; right: 0; bottom: 0; width: 100%; margin-top: 40px; padding: 25px;}
+            
+            body, html { cursor: auto; } /* Disable custom cursor on mobile */
+            .cursor-dot, .cursor-outline { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Interactive Cursor -->
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline"></div>
+
+    <!-- Cinematic Loader -->
+    <div id="intro-loader">
+        <h1 class="loader-title">
+            <span>Maa</span>&nbsp;<span>Vaishnavi.</span>
+        </h1>
+        <div class="loader-line"></div>
+    </div>
+
+    <!-- 3D Environment -->
+    <div id="canvas-container"></div>
+
+    <!-- Navigation -->
+    <header id="navbar">
+        <a href="index.html" class="logo hover-target">Maa Vaishnavi.</a>
+        
+        <div class="nav-links">
+            <a href="about.html" class="nav-item hover-target">About Us</a>
+            <button class="btn hover-target" onclick="window.open('https://www.google.co.in/search?trk=https://c.gle/AOPyDKQdQrygN4rQ9P7MJMFKxHIct5hrt7T2r6l3Rvqjs7j_sokDF8ZUhbwAgkkBGorBWcZ4BbAarZNSQxtDXi73_9UpBZBmVgM1qsFH3SaFXogcFuU0o8YJPKL633iKTqY9&q=Maa+Vaishnavi+Eye+Hospital+Ranchi&ludocid=10709402421128464418&lsig=AB86z5UfPv3ypoCTwijMujV6Wkp_&sei=2lEwat6LCJHcseMPloKfUA', '_blank')">Book Visit</button>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-text">
+            <h1 class="hero-title">Vision that <br><span>Changes Everything.</span></h1>
+        </div>
+        <p class="hero-desc">State-of-the-art ophthalmology and microscopic precision in the heart of Ranchi.</p>
+        
+        <div class="hero-booking-card">
+            <h3>Need a Checkup?</h3>
+            <p>Our specialists are available for comprehensive diagnostics and consultations.</p>
+            <button class="btn hover-target" style="width: 100%;" onclick="window.open('https://www.google.co.in/search?trk=https://c.gle/AOPyDKQdQrygN4rQ9P7MJMFKxHIct5hrt7T2r6l3Rvqjs7j_sokDF8ZUhbwAgkkBGorBWcZ4BbAarZNSQxtDXi73_9UpBZBmVgM1qsFH3SaFXogcFuU0o8YJPKL633iKTqY9&q=Maa+Vaishnavi+Eye+Hospital+Ranchi&ludocid=10709402421128464418&lsig=AB86z5UfPv3ypoCTwijMujV6Wkp_&sei=2lEwat6LCJHcseMPloKfUA', '_blank')">Schedule Now</button>
+        </div>
+    </section>
+
+    <!-- About The Doctor -->
+    <section class="section light-bg">
+        <div class="section-header reveal">
+            <h2 class="section-title">Leadership</h2>
+            <span class="section-subtitle">Meet The Expert</span>
+        </div>
+        <div class="split-layout">
+            <div class="text-content reveal">
+                <h3>Dr. Shubham Kumar</h3>
+                <h4>Lead Consultant & Surgeon</h4>
+                <p>With an uncompromising dedication to visual health, Dr. Shubham Kumar leads Maa Vaishnavi Eye Hospital's surgical and diagnostic teams. He has pioneered advanced, minimally invasive ocular procedures in the region.</p>
+                <p>His philosophy is simple: combine the world's most advanced optical technology with deep, empathetic patient care to restore not just sight, but quality of life.</p>
+                <br>
+                <button class="btn hover-target" onclick="window.location.href='about.html'">Read Our Story</button>
+            </div>
+            <div class="image-wrapper hover-target reveal" style="transition-delay: 0.2s;">
+                <img src="s.jpeg" alt="Dr. Shubham Kumar">
+            </div>
+        </div>
+    </section>
+
+    <!-- Editorial Gallery -->
+    <section class="section">
+        <div class="section-header reveal">
+            <h2 class="section-title">The Facility</h2>
+            <span class="section-subtitle">World-Class Environment</span>
+        </div>
+        <div class="editorial-grid">
+            <div class="grid-item item-1 hover-target reveal"><img src="1.jpeg" alt="Hospital View"></div>
+            <div class="grid-item item-2 hover-target reveal" style="transition-delay: 0.1s;"><img src="2.jpeg" alt="Equipment"></div>
+            <div class="grid-item item-3 hover-target reveal" style="transition-delay: 0.2s;"><img src="3.jpeg" alt="Staff"></div>
+            <div class="grid-item item-4 hover-target reveal" style="transition-delay: 0.3s;"><img src="4.jpeg" alt="Reception"></div>
+            <div class="grid-item item-5 hover-target reveal" style="transition-delay: 0.4s;"><img src="5.jpeg" alt="Diagnostics"></div>
+            <div class="grid-item item-5 hover-target reveal" style="transition-delay: 0.4s;"><img src="6.jpeg" alt="Diagnostics"></div>
+            <div class="grid-item item-5 hover-target reveal" style="transition-delay: 0.4s;"><img src="7.jpeg" alt="Diagnostics"></div>
+            <div class="grid-item item-5 hover-target reveal" style="transition-delay: 0.4s;"><img src="8.jpeg" alt="Diagnostics"></div>
+            <div class="grid-item item-5 hover-target reveal" style="transition-delay: 0.4s;"><img src="9.jpeg" alt="Diagnostics"></div>
+            <div class="grid-item item-5 hover-target reveal" style="transition-delay: 0.4s;"><img src="10.jpeg" alt="Diagnostics"></div>
+            <div class="grid-item item-5 hover-target reveal" style="transition-delay: 0.4s;"><img src="11.jpeg" alt="Diagnostics"></div>
+            <div class="grid-item item-5 hover-target reveal" style="transition-delay: 0.4s;"><img src="12.jpeg" alt="Diagnostics"></div>
+            <div class="grid-item item-5 hover-target reveal" style="transition-delay: 0.4s;"><img src="13.jpeg" alt="Diagnostics"></div>
+            <div class="grid-item item-5 hover-target reveal" style="transition-delay: 0.4s;"><img src="14.jpeg" alt="Diagnostics"></div>
+            <div class="grid-item item-5 hover-target reveal" style="transition-delay: 0.4s;"><img src="15.jpeg" alt="Diagnostics"></div>
+            <div class="grid-item item-5 hover-target reveal" style="transition-delay: 0.2s;"><img src="nm.jpeg" alt="Staff"></div>
+            <div class="grid-item item-5 hover-target reveal" style="transition-delay: 0.2s;"><img src="mm.jpeg" alt="Staff"></div>
+            <div class="grid-item item-5 hover-target reveal" style="transition-delay: 0.2s;"><img src="18.jpeg" alt="Staff"></div>
+            <div class="grid-item item-5 hover-target reveal" style="transition-delay: 0.2s;"><img src="19.jpeg" alt="Staff"></div>
+            <div class="grid-item item-5 hover-target reveal" style="transition-delay: 0.2s;"><img src="20.jpeg" alt="Staff"></div>
+            <div class="grid-item item-5 hover-target reveal" style="transition-delay: 0.2s;"><img src="21.jpeg" alt="Staff"></div>
+            <div class="grid-item item-5 hover-target reveal" style="transition-delay: 0.2s;"><img src="22.jpeg" alt="Staff"></div>
+            <div class="grid-item item-5 hover-target reveal" style="transition-delay: 0.2s;"><img src="23.jpeg" alt="Staff"></div>
+            <div class="grid-item item-5 hover-target reveal" style="transition-delay: 0.2s;"><img src="24.jpeg" alt="Staff"></div>
+            <div class="grid-item item-5 hover-target reveal" style="transition-delay: 0.2s;"><img src="25.jpeg" alt="Staff"></div>
+            <div class="grid-item item-5 hover-target reveal" style="transition-delay: 0.2s;"><img src="26.jpeg" alt="Staff"></div>
+            <div class="grid-item item-5 hover-target reveal" style="transition-delay: 0.2s;"><img src="27.jpeg" alt="Staff"></div>
+            <div class="grid-item item-5 hover-target reveal" style="transition-delay: 0.2s;"><img src="28.jpeg" alt="Staff"></div>
+            <div class="grid-item item-5 hover-target reveal" style="transition-delay: 0.2s;"><img src="29.jpeg" alt="Staff"></div>
+            <div class="grid-item item-5 hover-target reveal" style="transition-delay: 0.2s;"><img src="30.jpeg" alt="Staff"></div>
+            <div class="grid-item item-5 hover-target reveal" style="transition-delay: 0.2s;"><img src="31.jpeg" alt="Staff"></div>
+            <div class="grid-item item-5 hover-target reveal" style="transition-delay: 0.2s;"><img src="32.jpeg" alt="Staff"></div>
+            <div class="grid-item item-5 hover-target reveal" style="transition-delay: 0.2s;"><img src="33.jpeg" alt="Staff"></div>
+            <div class="grid-item item-5 hover-target reveal" style="transition-delay: 0.2s;"><img src="34.jpeg" alt="Staff"></div>
+            <div class="grid-item item-5 hover-target reveal" style="transition-delay: 0.2s;"><img src="35.jpeg" alt="Staff"></div>
+            <div class="grid-item item-5 hover-target reveal" style="transition-delay: 0.2s;"><img src="36.jpeg" alt="Staff"></div>
+            <div class="grid-item item-5 hover-target reveal" style="transition-delay: 0.2s;"><img src="37.jpeg" alt="Staff"></div>
+            <div class="grid-item item-5 hover-target reveal" style="transition-delay: 0.2s;"><img src="38.jpeg" alt="Staff"></div>
+
+        </div>
+    </section>
+
+    <script>
+        // ==========================================
+        // 1. CUSTOM CURSOR
+        // ==========================================
+        const cursorDot = document.querySelector('.cursor-dot');
+        const cursorOutline = document.querySelector('.cursor-outline');
+        
+        // Only run custom cursor logic if not on a small mobile device
+        if (window.innerWidth > 900) {
+            window.addEventListener('mousemove', (e) => {
+                const posX = e.clientX;
+                const posY = e.clientY;
+                
+                cursorDot.style.left = `${posX}px`;
+                cursorDot.style.top = `${posY}px`;
+                
+                cursorOutline.animate({
+                    left: `${posX}px`, top: `${posY}px`
+                }, { duration: 500, fill: "forwards" });
+            });
+
+            document.querySelectorAll('.hover-target').forEach(el => {
+                el.addEventListener('mouseenter', () => document.body.classList.add('hovering'));
+                el.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
+            });
+        }
+
+        // ==========================================
+        // 2. OPENING ANIMATION (GSAP)
+        // ==========================================
+        const tl = gsap.timeline();
+        
+        tl.to(".loader-title span", { y: 0, duration: 1, stagger: 0.2, ease: "power4.out", delay: 0.5 })
+          .to(".loader-line", { width: "200px", duration: 0.8, ease: "power2.inOut" })
+          .to("#intro-loader", { yPercent: -100, duration: 1.2, ease: "expo.inOut", delay: 0.5 })
+          .to("header", { y: 0, opacity: 1, duration: 1, ease: "power3.out" }, "-=0.5")
+          .to(".hero-title", { y: 0, opacity: 1, duration: 1, ease: "power4.out" }, "-=0.8")
+          .to(".hero-desc", { y: 0, opacity: 1, duration: 1, ease: "power3.out" }, "-=0.6")
+          .to(".hero-booking-card", { y: 0, opacity: 1, duration: 1, ease: "back.out(1.7)" }, "-=0.5");
+
+        // Scroll Reveals
+        function reveal() {
+            var reveals = document.querySelectorAll(".reveal");
+            for (var i = 0; i < reveals.length; i++) {
+                var windowHeight = window.innerHeight;
+                var elementTop = reveals[i].getBoundingClientRect().top;
+                if (elementTop < windowHeight - 100) reveals[i].classList.add("active");
+            }
+        }
+        window.addEventListener("scroll", reveal);
+        window.addEventListener("scroll", () => {
+            document.getElementById("navbar").classList.toggle("scrolled", window.scrollY > 50);
+        });
+
+        // ==========================================
+        // 3. 3D EYE & PARTICLES (THREE.JS)
+        // ==========================================
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        
+        // Adjust initial camera position for mobile vs desktop
+        if(window.innerWidth < 900) { 
+            camera.position.z = 8; // Pull back slightly on mobile
+            camera.position.x = 0; // Center on mobile
+        } else { 
+            camera.position.z = 7; 
+            camera.position.x = 2; // Shift right on desktop
+        }
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        container.appendChild(renderer.domElement);
+
+        // Group for Eye
+        const eyeGroup = new THREE.Group();
+        const scleraGeo = new THREE.SphereGeometry(2.5, 64, 64);
+        const scleraMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2, metalness: 0.1 });
+        eyeGroup.add(new THREE.Mesh(scleraGeo, scleraMat));
+
+        const irisGeo = new THREE.SphereGeometry(2.4, 64, 64, 0, Math.PI * 2, 0, Math.PI / 4.5);
+        const irisMat = new THREE.MeshStandardMaterial({ color: 0xD4AF37, roughness: 0.2, metalness: 0.5 });
+        const iris = new THREE.Mesh(irisGeo, irisMat); iris.position.z = 0.2; eyeGroup.add(iris);
+
+        const pupilGeo = new THREE.SphereGeometry(2.3, 64, 64, 0, Math.PI * 2, 0, Math.PI / 8);
+        const pupilMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        const pupil = new THREE.Mesh(pupilGeo, pupilMat); pupil.position.z = 0.3; eyeGroup.add(pupil);
+        
+        scene.add(eyeGroup);
+
+        // Add Floating Particles
+        const particlesGeometry = new THREE.BufferGeometry();
+        const particlesCount = 500;
+        const posArray = new Float32Array(particlesCount * 3);
+        for(let i = 0; i < particlesCount * 3; i++) { posArray[i] = (Math.random() - 0.5) * 20; }
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        const particlesMaterial = new THREE.PointsMaterial({ size: 0.05, color: 0xD4AF37, transparent: true, opacity: 0.6 });
+        const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particlesMesh);
+
+        // Lighting
+        scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+        const pointLight = new THREE.PointLight(0xffffff, 1.2); pointLight.position.set(5, 5, 5); scene.add(pointLight);
+
+        let targetX = 0, targetY = 0;
+        let windowHalfX = window.innerWidth / 2, windowHalfY = window.innerHeight / 2;
+
+        document.addEventListener('mousemove', (event) => {
+            targetX = (event.clientX - windowHalfX) / 1000;
+            targetY = (event.clientY - windowHalfY) / 1000;
+        });
+        
+        // Touch interaction for mobile
+        document.addEventListener('touchmove', (event) => {
+            if(event.touches.length > 0) {
+                targetX = (event.touches[0].pageX - windowHalfX) / 1000;
+                targetY = (event.touches[0].pageY - windowHalfY) / 1000;
+            }
+        }, { passive: true });
+
+        window.addEventListener('resize', () => {
+            windowHalfX = window.innerWidth / 2; windowHalfY = window.innerHeight / 2;
+            camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            if(window.innerWidth < 900) { camera.position.x = 0; camera.position.z = 8;} else { camera.position.x = 2; camera.position.z = 7;}
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+            // Eye rotation
+            eyeGroup.rotation.y += (targetX - eyeGroup.rotation.y) * 0.05;
+            eyeGroup.rotation.x += (targetY - eyeGroup.rotation.x) * 0.05;
+            eyeGroup.position.y = Math.sin(Date.now() * 0.001) * 0.2;
+
+            // Particle rotation
+            particlesMesh.rotation.y += 0.001;
+            particlesMesh.rotation.x += 0.0005;
+
+            renderer.render(scene, camera);
+        }
+        animate();
+    </script>
+</body>
+</html>
